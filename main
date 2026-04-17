@@ -1,0 +1,70 @@
+from servicios.catalogo_service import CatalogoService
+from servicios.carrito import Carrito
+from servicios.factura import Factura
+from modelos.videojuego import *
+
+catalogo = CatalogoService.cargar_json("catalogo.json")
+carrito = Carrito()
+
+while True:
+    print("\n1. Ver catálogo")
+    print("2. Agregar juego")
+    print("3. Agregar al carrito")
+    print("4. Ver carrito")
+    print("5. Comprar")
+    print("6. Salir")
+
+    op = input("Seleccione: ")
+
+    try:
+        if op == "1":
+            for j in catalogo:
+                print(j.to_dict())
+
+        elif op == "2":
+            id = int(input("ID: "))
+            nombre = input("Nombre: ")
+            categoria = input("Categoria: ")
+            precio = float(input("Precio: "))
+            esrb = input("ESRB: ")
+            stock = int(input("Stock: "))
+            consola = input("Consola (PS5/XBOX/Nintendo): ")
+
+            juego = CatalogoService.crear_objeto({
+                "id": id,
+                "nombre": nombre,
+                "categoria": categoria,
+                "precio": precio,
+                "esrb": esrb,
+                "stock": stock,
+                "consola": consola
+            })
+
+            CatalogoService.agregar_juego(catalogo, juego)
+
+        elif op == "3":
+            nombre = input("Juego: ")
+            cantidad = int(input("Cantidad: "))
+
+            juego = next((j for j in catalogo if j.nombre == nombre), None)
+
+            if not juego:
+                print("No existe")
+            else:
+                carrito.agregar(juego, cantidad)
+
+        elif op == "4":
+            carrito.mostrar()
+            print("Total:", carrito.total())
+
+        elif op == "5":
+            cliente = input("Nombre cliente: ")
+            archivo = input("Nombre archivo: ") + ".json"
+            Factura.generar(cliente, carrito, archivo)
+            print("Factura generada")
+
+        elif op == "6":
+            break
+
+    except Exception as e:
+        print("Error:", e)
